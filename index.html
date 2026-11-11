@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember — Dinner from what you already have</title>
+<meta name="description" content="Ember turns the half-forgotten things in your fridge into tonight's dinner. Less waste, less deciding, more eating.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Instrument+Sans:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#b72818;
+  --orange:#bc6022;
+  --cream:#e8c599;
+  --ink:#2a0f0a;          /* deepened red, for text */
+  --paper:#f6e9d4;        /* lightened cream, for large surfaces */
+  --serif:'Fraunces',Georgia,serif;
+  --sans:'Instrument Sans',system-ui,sans-serif;
+  --hand:'Caveat',cursive;
+  --r:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{ /* paper grain */
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.07;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a{color:inherit}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--serif);font-weight:800;letter-spacing:-.03em;line-height:.98}
+em{font-style:italic;font-weight:600;color:var(--red)}
+.eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--orange)}
+.btn{display:inline-flex;align-items:center;gap:.6rem;padding:1rem 1.6rem;border-radius:999px;background:var(--red);color:var(--paper);font-weight:600;text-decoration:none;border:0;cursor:pointer;font-size:1rem;font-family:inherit;transition:transform .25s,box-shadow .25s,background .25s;box-shadow:0 6px 0 #7d1a0f}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 #7d1a0f}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7d1a0f}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+
+/* NAV */
+nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:2rem;padding:.6rem .6rem .6rem 1.4rem;background:rgba(246,233,212,.85);backdrop-filter:blur(14px);border-radius:999px;box-shadow:0 0 0 1.5px rgba(42,15,10,.12),0 10px 30px rgba(42,15,10,.1);width:max-content;max-width:calc(100% - 32px)}
+.logo{font-family:var(--serif);font-weight:800;font-size:1.35rem;letter-spacing:-.04em;text-decoration:none;display:flex;align-items:center;gap:.4rem}
+.logo i{width:12px;height:12px;border-radius:50% 50% 50% 0;background:var(--red);transform:rotate(-45deg);display:inline-block}
+nav ul{display:flex;gap:1.6rem;list-style:none;font-size:.95rem;font-weight:500}
+nav ul a{text-decoration:none;opacity:.75}nav ul a:hover{opacity:1;color:var(--red)}
+nav .btn{padding:.65rem 1.2rem;font-size:.9rem;box-shadow:none}
+nav .btn:hover{box-shadow:none;transform:scale(1.04)}
+
+/* HERO */
+.hero{padding:150px 0 90px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(3.2rem,8vw,7.2rem);margin:1rem 0 1.6rem}
+.hero h1 .strike{position:relative;display:inline-block;color:var(--orange)}
+.hero h1 .strike::after{content:"";position:absolute;left:-2%;right:-2%;top:54%;height:.09em;background:var(--red);transform:rotate(-2deg);border-radius:4px;transform-origin:left;animation:draw 1s .6s both cubic-bezier(.7,0,.2,1)}
+@keyframes draw{from{transform:rotate(-2deg) scaleX(0)}}
+.lede{font-size:1.25rem;max-width:34ch;opacity:.85;margin-bottom:2rem}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.note{font-family:var(--hand);font-size:1.5rem;color:var(--red);transform:rotate(-3deg);display:inline-block;margin-left:.4rem}
+.proof{display:flex;align-items:center;gap:.9rem;margin-top:2.4rem;font-size:.92rem}
+.faces{display:flex}
+.faces span{width:38px;height:38px;border-radius:50%;border:3px solid var(--paper);margin-left:-10px;display:grid;place-items:center;font-weight:700;font-size:.8rem;color:var(--paper)}
+.faces span:first-child{margin-left:0}
+.faces span:nth-child(1){background:var(--red)}.faces span:nth-child(2){background:var(--orange)}.faces span:nth-child(3){background:var(--ink)}.faces span:nth-child(4){background:#a0784a}
+
+/* DEMO CARD */
+.demo{background:var(--red);color:var(--paper);border-radius:var(--r);padding:28px;position:relative;box-shadow:0 30px 60px -20px rgba(183,40,24,.55);transform:rotate(1.5deg);transition:transform .5s}
+.demo:hover{transform:rotate(0)}
+.demo::before{content:"Try it ↓";position:absolute;top:-34px;right:20px;font-family:var(--hand);font-size:1.7rem;color:var(--orange);transform:rotate(4deg)}
+.demo h3{font-size:1.5rem;margin-bottom:.3rem;letter-spacing:-.02em}
+.demo p.sub{font-size:.9rem;opacity:.8;margin-bottom:1.1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.3rem}
+.chip{border:1.5px solid rgba(232,197,153,.6);background:transparent;color:var(--cream);padding:.45rem .9rem;border-radius:999px;font-family:inherit;font-size:.92rem;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--cream)}
+.chip[aria-pressed=true]{background:var(--cream);color:var(--red);border-color:var(--cream);font-weight:600;transform:scale(1.05)}
+.result{background:var(--paper);color:var(--ink);border-radius:20px;padding:20px;min-height:170px}
+.result .tag{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);font-weight:600}
+.result h4{font-family:var(--serif);font-size:1.7rem;letter-spacing:-.03em;line-height:1.05;margin:.35rem 0 .6rem}
+.result .meta{display:flex;gap:1rem;font-size:.85rem;opacity:.8;margin-bottom:.8rem;flex-wrap:wrap}
+.result .miss{font-size:.85rem;padding:.5rem .75rem;border-radius:12px;background:rgba(188,96,34,.14);color:#7a3a0d}
+.result.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.96);opacity:.4}}
+
+/* MARQUEE */
+.marquee{background:var(--ink);color:var(--cream);overflow:hidden;padding:1.1rem 0;transform:rotate(-1.2deg);margin:0 -20px}
+.marquee div{display:flex;gap:3rem;white-space:nowrap;width:max-content;animation:scroll 32s linear infinite;font-family:var(--serif);font-size:1.7rem;font-weight:600;font-style:italic}
+.marquee span::after{content:"✺";margin-left:3rem;color:var(--orange);font-style:normal}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* PROBLEM */
+.problem{padding:60px 0 100px}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:end}
+.problem h2{font-size:clamp(2.4rem,5.5vw,4.6rem)}
+.problem p{font-size:1.15rem;opacity:.85;max-width:44ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.stat{padding:28px;border-radius:var(--r);background:var(--cream)}
+.stat:nth-child(2){background:var(--orange);color:var(--paper)}
+.stat:nth-child(3){background:var(--red);color:var(--paper)}
+.stat b{font-family:var(--serif);font-size:clamp(3rem,6vw,5rem);letter-spacing:-.05em;line-height:1;display:block}
+.stat>span{font-size:.95rem;opacity:.9}
+
+/* STEPS (sticky stack) */
+.steps{padding:40px 0 100px}
+.steps h2{font-size:clamp(2.4rem,5.5vw,4.6rem);margin:.8rem 0 3rem;max-width:14ch}
+.step{position:sticky;top:110px;display:grid;grid-template-columns:auto 1fr auto;gap:2rem;align-items:center;padding:36px 40px;border-radius:var(--r);margin-bottom:24px;min-height:200px}
+.step:nth-of-type(1){background:var(--cream)}
+.step:nth-of-type(2){background:var(--orange);color:var(--paper);top:130px}
+.step:nth-of-type(3){background:var(--red);color:var(--paper);top:150px}
+.step .n{font-family:var(--serif);font-size:6rem;font-weight:800;line-height:1;opacity:.35;letter-spacing:-.06em}
+.step h3{font-size:2.2rem;margin-bottom:.5rem}
+.step p{max-width:46ch;opacity:.9}
+.step .em{font-size:4.5rem}
+
+/* BENTO */
+.bento{padding:40px 0 100px}
+.bento h2{font-size:clamp(2.4rem,5.5vw,4.6rem);margin:.8rem 0 3rem}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+.tile{border-radius:var(--r);padding:30px;position:relative;overflow:hidden;transition:transform .35s}
+.tile:hover{transform:translateY(-6px) rotate(-.4deg)}
+.tile h3{font-size:1.9rem;margin-bottom:.6rem;letter-spacing:-.03em}
+.tile p{font-size:.98rem;opacity:.88;max-width:36ch}
+.t1{grid-column:span 4;background:var(--red);color:var(--paper);min-height:300px}
+.t2{grid-column:span 2;background:var(--cream)}
+.t3{grid-column:span 2;background:var(--ink);color:var(--cream)}
+.t4{grid-column:span 4;background:var(--orange);color:var(--paper);min-height:260px}
+.big{position:absolute;right:-10px;bottom:-40px;font-size:11rem;opacity:.22;line-height:1;pointer-events:none}
+.bar{margin-top:1.4rem;height:14px;border-radius:99px;background:rgba(246,233,212,.25);overflow:hidden;max-width:360px}
+.bar i{display:block;height:100%;width:0;background:var(--cream);border-radius:99px;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.in .bar i{width:78%}
+
+/* FOUNDER */
+.founder{padding:20px 0 100px}
+.letter{background:#fbf3e4;border-radius:var(--r);padding:56px;display:grid;grid-template-columns:260px 1fr;gap:56px;box-shadow:0 0 0 1.5px rgba(42,15,10,.1),0 30px 50px -30px rgba(42,15,10,.35);position:relative;background-image:repeating-linear-gradient(transparent 0 33px,rgba(188,96,34,.13) 33px 34px)}
+.polaroid{background:#fff;padding:14px 14px 56px;box-shadow:0 14px 30px rgba(42,15,10,.25);transform:rotate(-4deg);align-self:start;position:relative}
+.polaroid .photo{aspect-ratio:1;background:radial-gradient(circle at 30% 30%,var(--cream),var(--orange) 55%,var(--red));display:grid;place-items:center;font-size:5rem}
+.polaroid span{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--hand);font-size:1.5rem}
+.letter h2{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:1.2rem;display:block}
+.letter p{margin-bottom:1rem;font-size:1.08rem;max-width:52ch}
+.sig{font-family:var(--hand);font-size:2.4rem;color:var(--red);margin-top:.6rem}
+
+/* QUOTES */
+.quotes{padding:20px 0 100px}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.q{padding:30px;border-radius:var(--r);border:2px solid var(--ink)}
+.q:nth-child(2){transform:translateY(24px);background:var(--cream);border-color:var(--cream)}
+.q p{font-family:var(--serif);font-size:1.3rem;line-height:1.25;letter-spacing:-.02em;margin-bottom:1.2rem}
+.q small{font-weight:600;font-size:.85rem;opacity:.7}
+
+/* PRICING */
+.pricing{padding:60px 0 100px}
+.pricing h2{font-size:clamp(2.4rem,5.5vw,4.6rem);text-align:center;margin:.8rem 0 3rem}
+.pricing .eyebrow{text-align:center;display:block}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;margin:0 auto}
+.plan{padding:40px;border-radius:var(--r);background:var(--cream)}
+.plan.pro{background:var(--red);color:var(--paper);transform:rotate(1deg)}
+.plan h3{font-size:1.6rem}
+.price{font-family:var(--serif);font-size:4.2rem;font-weight:800;letter-spacing:-.05em;margin:.6rem 0 1rem;line-height:1}
+.price small{font-size:1rem;font-weight:400;letter-spacing:0;font-family:var(--sans);opacity:.8}
+.plan ul{list-style:none;margin-bottom:1.8rem}
+.plan li{padding:.35rem 0 .35rem 1.6rem;position:relative}
+.plan li::before{content:"✺";position:absolute;left:0;color:var(--orange)}
+.plan.pro li::before{color:var(--cream)}
+.plan.pro .btn{background:var(--cream);color:var(--red);box-shadow:0 6px 0 var(--orange)}
+
+/* FAQ */
+.faq{padding:0 0 100px;max-width:800px;margin:0 auto}
+.faq h2{font-size:2.8rem;margin-bottom:1.6rem}
+details{border-top:1.5px solid rgba(42,15,10,.25);padding:1.2rem 0}
+details:last-child{border-bottom:1.5px solid rgba(42,15,10,.25)}
+summary{cursor:pointer;font-family:var(--serif);font-size:1.35rem;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:1rem;letter-spacing:-.02em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--red);font-size:1.8rem;line-height:1;transition:transform .3s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin-top:.8rem;opacity:.85;max-width:60ch}
+
+/* FINAL CTA */
+.final{background:var(--red);color:var(--paper);border-radius:48px 48px 0 0;padding:110px 0 70px;text-align:center;position:relative;overflow:hidden}
+.final h2{font-size:clamp(3rem,9vw,8rem);margin-bottom:1.6rem}
+.final h2 em{color:var(--cream)}
+.final p{font-size:1.2rem;opacity:.9;margin-bottom:2rem}
+form{display:flex;gap:10px;max-width:480px;margin:0 auto;background:var(--paper);padding:8px;border-radius:999px}
+form input{flex:1;border:0;background:transparent;padding:0 1.2rem;font:inherit;color:var(--ink);min-width:0;outline:none}
+form .btn{box-shadow:none;padding:.9rem 1.4rem}
+.thanks{font-family:var(--hand);font-size:1.8rem;color:var(--cream);margin-top:1rem;min-height:2.4rem}
+footer{margin-top:80px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.88rem;opacity:.8;text-align:left}
+footer a{margin-left:1.2rem}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(34px);transition:opacity .9s,transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .hero{padding-top:120px}
+  .hero-grid,.problem-grid,.letter,.plans,.qgrid{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .t1,.t2,.t3,.t4{grid-column:auto}
+  .step{grid-template-columns:1fr;position:relative;top:0!important;padding:28px}
+  .step .em{display:none}.step .n{font-size:3.5rem}
+  .letter{padding:32px 24px}.polaroid{max-width:220px}
+  .q:nth-child(2){transform:none}
+  .plan.pro{transform:none}
+  .demo{transform:none;margin-top:24px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Main">
+  <a class="logo" href="#top"><i></i>Ember</a>
+  <ul>
+    <li><a href="#problem">Why</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#story">Our story</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <a class="btn" href="#join">Get early access</a>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">The anti-food-waste dinner app</span>
+      <h1>Stop <span class="strike">deciding.</span><br>Start <em>eating.</em></h1>
+      <p class="lede">Ember looks at what’s already in your fridge and tells you what to cook tonight. No shopping trip. No 9pm “what should we eat?” spiral.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#join">Join the waitlist →</a>
+        <a class="btn ghost" href="#how">See how it works</a>
+        <span class="note">free while we’re small ↖</span>
+      </div>
+      <div class="proof">
+        <div class="faces" aria-hidden="true"><span>M</span><span>J</span><span>A</span><span>+</span></div>
+        <span><b>2,400+ households</b> already cooking from their fridge</span>
+      </div>
+    </div>
+
+    <section class="demo" aria-label="Interactive demo">
+      <h3>What’s in your fridge?</h3>
+      <p class="sub">Tap a few things. Ember does the rest.</p>
+      <div class="chips" id="chips"></div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </section>
+  </div>
+</header>
+
+<div style="overflow:hidden;padding:20px 0"><div class="marquee" aria-hidden="true"><div id="mq"></div></div></div>
+
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="problem-grid rv">
+      <h2>Your fridge isn’t empty. <em>You’re just out of ideas.</em></h2>
+      <p>Every week the same thing happens. Half a cabbage. Three eggs. Yogurt that’s “probably fine.” You stare, you sigh, you order takeout, and the cabbage quietly gives up. It’s not a cooking problem. It’s a <b>decision</b> problem, and it costs real money.</p>
+    </div>
+    <div class="stats">
+      <div class="stat rv"><b data-count="30">0</b><span>% of the food a typical household buys ends up in the bin</span></div>
+      <div class="stat rv"><b>$<span data-count="1500">0</span></b><span>thrown away per family, per year, on average</span></div>
+      <div class="stat rv"><b data-count="35">0</b><span>minutes a week spent just deciding what to make</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="steps" id="how">
+  <div class="wrap">
+    <span class="eyebrow">How it works</span>
+    <h2 class="rv">Three taps to <em>tonight.</em></h2>
+
+    <article class="step"><div class="n">01</div><div><h3>Snap or tap</h3><p>Photograph your fridge shelf, or tap the basics. Ember recognises produce, leftovers and even the mystery tupperware.</p></div><div class="em">📸</div></article>
+    <article class="step"><div class="n">02</div><div><h3>Get one answer</h3><p>Not fifty tabs of recipes. One dinner that uses the thing about to expire first, sized for how many are eating.</p></div><div class="em">🍳</div></article>
+    <article class="step"><div class="n">03</div><div><h3>Cook, then forget it</h3><p>Step-by-step with your hands full, voice-friendly, no scrolling past someone’s life story. Ember updates your fridge when you’re done.</p></div><div class="em">🔥</div></article>
+  </div>
+</section>
+
+<section class="bento">
+  <div class="wrap">
+    <span class="eyebrow">Built around real kitchens</span>
+    <h2 class="rv">Small things that <em>change</em> your week.</h2>
+    <div class="grid">
+      <div class="tile t1 rv"><h3>Use-it-first scoring</h3><p>Ember ranks everything by how soon it spoils, so the spinach gets a starring role before the cabbage even knows what happened.</p><div class="bar"><i></i></div><span class="big">🥬</span></div>
+      <div class="tile t2 rv"><h3>Picky-eater mode</h3><p>Tell it who hates mushrooms. It remembers, forever, without judgment.</p></div>
+      <div class="tile t3 rv"><h3>One-pan bias</h3><p>Fewer dishes is a feature. Filter to 1 pan, 20 minutes, or “I’m so tired.”</p></div>
+      <div class="tile t4 rv"><h3>Shared fridge</h3><p>Roommates, partners, kids: everyone sees what’s inside, and who ate the last yogurt (we don’t name names. Okay, we do.)</p><span class="big">🧀</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="founder" id="story">
+  <div class="wrap">
+    <div class="letter rv">
+      <div class="polaroid"><div class="photo">🍲</div><span>Mum’s Sunday soup</span></div>
+      <div>
+        <span class="eyebrow">A note from the maker</span>
+        <h2>I built this because of my mum’s fridge.</h2>
+        <p>Growing up, her fridge was a magic trick. Odds and ends went in on Monday, and by Sunday a pot of something wonderful came out. She never followed a recipe. She just <em>looked</em>.</p>
+        <p>When I moved out, I couldn’t do it. I threw away so much food that I started keeping a tally on a sticky note. It was embarrassing. Ember is my attempt to put her eyes in your pocket.</p>
+        <div class="sig">— Your name here</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quotes">
+  <div class="wrap qgrid">
+    <figure class="q rv"><p>“We cut our grocery bill by almost a third. I didn’t even try. It just kept telling me to cook the kale.”</p><small>Maya R. · Parent of two</small></figure>
+    <figure class="q rv"><p>“The first app that made me feel less guilty about food, not more. It’s oddly kind.”</p><small>Jonah K. · Grad student</small></figure>
+    <figure class="q rv"><p>“Picky-eater mode saved my marriage. I said what I said.”</p><small>Alicia T. · Home cook</small></figure>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <span class="eyebrow">Pricing</span>
+    <h2 class="rv">Cheaper than one <em>wasted</em> head of lettuce.</h2>
+    <div class="plans">
+      <div class="plan rv"><h3>Pantry</h3><div class="price">$0<small> forever</small></div><ul><li>3 dinner ideas a day</li><li>Photo + tap fridge input</li><li>Use-it-first scoring</li></ul><a class="btn" href="#join">Start free</a></div>
+      <div class="plan pro rv"><h3>Hearth</h3><div class="price">$4<small> / month</small></div><ul><li>Unlimited ideas</li><li>Shared household fridge</li><li>Picky-eater memory</li><li>Weekly waste report</li></ul><a class="btn" href="#join">Join waitlist</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="faq wrap">
+  <h2>Questions, answered.</h2>
+  <details><summary>Do I need to scan every item?</summary><p>Nope. A single photo of each shelf is enough, or tap the handful of things you have. Ember is happy to guess, and you can correct it.</p></details>
+  <details><summary>What if I’m missing an ingredient?</summary><p>Ember only suggests dinners you can make now, and flags one swap or missing staple when it’s close, like “no cream? Use yogurt.”</p></details>
+  <details><summary>Does it handle allergies and diets?</summary><p>Yes. Set them once for each person in your household and they’re respected on every suggestion.</p></details>
+  <details><summary>Is it really free?</summary><p>The Pantry plan is free forever. Hearth pays for the shared-fridge servers and keeps us independent.</p></details>
+</section>
+
+<section class="final" id="join">
+  <div class="wrap">
+    <h2>Tonight’s dinner is <em>already</em> in there.</h2>
+    <p>Get early access and a free first month of Hearth.</p>
+    <form id="form">
+      <input type="email" required placeholder="you@kitchen.com" aria-label="Email address">
+      <button class="btn" type="submit">Notify me</button>
+    </form>
+    <div class="thanks" id="thanks" aria-live="polite"></div>
+    <footer>
+      <span>© 2026 Ember. Made with too many leftovers.</span>
+      <span><a href="#">Instagram</a><a href="#">Privacy</a><a href="#">Say hi</a></span>
+    </footer>
+  </div>
+</section>
+
+<script>
+const recipes=[
+ {need:['eggs','rice'],opt:['spinach','onion'],name:'Fried rice, fridge-clearing edition',time:15,pans:1},
+ {need:['pasta','tomatoes'],opt:['cheese','onion'],name:'Blistered tomato pasta',time:20,pans:2},
+ {need:['eggs','spinach'],opt:['cheese','bread'],name:'Green shakshuka-ish skillet',time:18,pans:1},
+ {need:['chicken','rice'],opt:['onion','spinach'],name:'One-pot lemony chicken & rice',time:30,pans:1},
+ {need:['bread','cheese'],opt:['tomatoes','eggs'],name:'Crispy melt with a jammy egg',time:10,pans:1},
+ {need:['potatoes','onion'],opt:['eggs','cheese'],name:'Spanish-style tortilla',time:25,pans:1},
+ {need:['pasta','eggs'],opt:['cheese','spinach'],name:'Carbonara without the stress',time:15,pans:2},
+];
+const items=['eggs','rice','spinach','tomatoes','pasta','cheese','onion','chicken','bread','potatoes'];
+const emoji={eggs:'🥚',rice:'🍚',spinach:'🥬',tomatoes:'🍅',pasta:'🍝',cheese:'🧀',onion:'🧅',chicken:'🍗',bread:'🍞',potatoes:'🥔'};
+const sel=new Set(['eggs','spinach']);
+const chips=document.getElementById('chips'),result=document.getElementById('result');
+items.forEach(i=>{const b=document.createElement('button');b.className='chip';b.textContent=emoji[i]+' '+i;b.setAttribute('aria-pressed',sel.has(i));
+ b.onclick=()=>{sel.has(i)?sel.delete(i):sel.add(i);b.setAttribute('aria-pressed',sel.has(i));render()};chips.append(b)});
+function render(){
+  let best=null,bs=-1;
+  recipes.forEach(r=>{const have=r.need.filter(n=>sel.has(n)).length;if(have===0)return;
+    const s=have*10+r.opt.filter(o=>sel.has(o)).length-(r.need.length-have)*6;if(s>bs){bs=s;best=r}});
+  result.classList.remove('pop');void result.offsetWidth;result.classList.add('pop');
+  if(!best){result.innerHTML='<span class="tag">Waiting on you</span><h4>Your fridge looks lonely.</h4><p>Tap a couple of ingredients above.</p>';return}
+  const miss=best.need.filter(n=>!sel.has(n));
+  result.innerHTML=`<span class="tag">Tonight’s answer</span><h4>${best.name}</h4>
+   <div class="meta"><span>⏱ ${best.time} min</span><span>🍳 ${best.pans} pan${best.pans>1?'s':''}</span><span>♻️ uses ${best.need.filter(n=>sel.has(n)).concat(best.opt.filter(o=>sel.has(o))).join(', ')}</span></div>
+   ${miss.length?`<div class="miss">Almost! You’re missing <b>${miss.join(', ')}</b>. Ember would suggest a swap.</div>`:`<div class="miss" style="background:rgba(183,40,24,.12);color:var(--red)">✓ You have everything. Go cook.</div>`}`;
+}
+render();
+
+// marquee
+const words=['Half a cabbage','Leftover rice','Sad celery','Three eggs','Mystery tupperware','Last of the cheese','Wilting herbs','Yogurt, probably fine'];
+document.getElementById('mq').innerHTML=[...words,...words].map(w=>`<span>${w}</span>`).join('');
+
+// reveal + counters
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(c=>{const t=+c.dataset.count;let s=null;
+    const f=ts=>{s=s||ts;const p=Math.min((ts-s)/1400,1);c.textContent=Math.round(t*(1-Math.pow(1-p,3))).toLocaleString();if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)});
+  io.unobserve(e.target)}),{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();
+  document.getElementById('thanks').textContent='You’re on the list. Go eat that cabbage. 🔥';e.target.reset()});
+</script>
+</body>
+</html>
